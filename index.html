@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>প্রতিশ্রুতি হেলথ্‌ পয়েন্ট - Pratisruti Health Point</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Phosphor Icons (For High-Quality Vector Icons) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .page-section {
+            display: none;
+            animation: fadeUp 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .active-section {
+            display: block;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .nav-btn.active {
+            color: #16a34a; /* green-600 */
+            font-weight: bold;
+            border-bottom: 2px solid #16a34a;
+        }
+        /* Custom Leaflet Colors for Doctors */
+        .doc-bg-1 { background-color: #2563eb; }
+        .doc-bg-2 { background-color: #ea580c; }
+        .doc-bg-3 { background-color: #16a34a; }
+        .doc-bg-4 { background-color: #6b21a8; }
+        .doc-bg-5 { background-color: #dc2626; }
+        .doc-bg-6 { background-color: #0284c7; }
+        .doc-bg-7 { background-color: #4f46e5; }
+        .doc-bg-8 { background-color: #059669; }
+        
+        /* Modern Glassmorphism & Gradients */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+    <!-- Top Bar -->
+    <div class="bg-red-600 text-white py-2 text-xs md:text-sm px-4 hidden lg:block">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex gap-6">
+                <span class="flex items-center gap-1 font-medium tracking-wide"><i class="ph ph-clock text-lg"></i> প্রতিদিন: সকাল ৮:০০ - রাত ১০:০০</span>
+                <span class="flex items-center gap-1 font-medium tracking-wide"><i class="ph ph-map-pin text-lg"></i> যোগীরমোড় (সুজাপুর), মালদা</span>
+            </div>
+            <div class="flex gap-4">
+                <span class="flex items-center gap-1 bg-red-700 px-3 py-0.5 rounded-full"><i class="ph-fill ph-phone-call"></i> 9933952899</span>
+                <span class="flex items-center gap-1 bg-red-700 px-3 py-0.5 rounded-full"><i class="ph-fill ph-phone-call"></i> 6297913318</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-white shadow-md py-3 transition-all">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <!-- Logo -->
+            <div onclick="showPage('home')" class="flex items-center gap-3 cursor-pointer group">
+                <div class="bg-gradient-to-br from-green-500 to-green-700 text-white p-2.5 rounded-xl group-hover:rotate-12 transition-transform shadow-lg">
+                    <i class="ph ph-heartbeat text-3xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-green-700 leading-none tracking-tight">প্রতিশ্রুতি</h1>
+                    <p class="text-[11px] text-slate-500 font-extrabold tracking-[0.2em] uppercase mt-1">হেলথ্‌ পয়েন্ট</p>
+                </div>
+            </div>
+
+            <!-- Desktop Menu -->
+            <div class="hidden lg:flex items-center gap-7 font-bold text-slate-600 text-[15px]">
+                <button onclick="showPage('home')" class="nav-btn pb-1 hover:text-green-600 transition-colors" id="btn-home">হোম</button>
+                <button onclick="showPage('doctors')" class="nav-btn pb-1 hover:text-green-600 transition-colors" id="btn-doctors">আমাদের ডাক্তারগণ</button>
+                <button onclick="showPage('pathology')" class="nav-btn pb-1 hover:text-green-600 transition-colors" id="btn-pathology">প্যাথলজি ও ল্যাব</button>
+                <button onclick="showPage('services')" class="nav-btn pb-1 hover:text-green-600 transition-colors" id="btn-services">ক্লিনিক পরিষেবা</button>
+                <button onclick="openAppointmentModal()" class="bg-gradient-to-r from-green-600 to-green-500 text-white px-6 py-2.5 rounded-full hover:shadow-lg hover:shadow-green-500/30 transition-all flex items-center gap-2">
+                    <i class="ph-fill ph-calendar-plus"></i> সিরিয়াল বুকিং
+                </button>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button class="lg:hidden p-2 text-3xl text-slate-700" onclick="toggleMobileMenu()">
+                <i class="ph ph-list"></i>
+            </button>
+            
+            <!-- Hidden Admin Button (Double click the logo to open admin panel) -->
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden lg:hidden absolute top-full left-0 w-full bg-white shadow-2xl border-t p-4 space-y-2">
+            <button onclick="showPage('home')" class="block w-full text-left font-bold py-3 px-4 rounded-lg hover:bg-green-50 hover:text-green-600">হোম</button>
+            <button onclick="showPage('doctors')" class="block w-full text-left font-bold py-3 px-4 rounded-lg hover:bg-green-50 hover:text-green-600">আমাদের ডাক্তারগণ</button>
+            <button onclick="showPage('pathology')" class="block w-full text-left font-bold py-3 px-4 rounded-lg hover:bg-green-50 hover:text-green-600">প্যাথলজি ও ল্যাব</button>
+            <button onclick="showPage('services')" class="block w-full text-left font-bold py-3 px-4 rounded-lg hover:bg-green-50 hover:text-green-600">ক্লিনিক ও নার্সিং পরিষেবা</button>
+            <button onclick="openAppointmentModal()" class="block w-full text-center font-bold py-3 bg-green-600 text-white rounded-xl mt-4">সিরিয়াল বুকিং</button>
+        </div>
+    </nav>
+
+    <!-- CONTENT AREA -->
+    <main class="flex-grow relative">
+        
+        <!-- ================= HOME PAGE ================= -->
+        <div id="home" class="page-section active-section">
+            <section class="relative py-20 md:py-32 overflow-hidden">
+                <!-- Background Image & Overlay -->
+                <div class="absolute inset-0 z-0">
+                    <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=2000" alt="Hospital Background" class="w-full h-full object-cover object-center" />
+                    <!-- Gradient overlay to make text readable -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-900/80 to-slate-800/40"></div>
+                </div>
+
+                <div class="container mx-auto px-4 flex flex-col lg:flex-row items-center gap-12 relative z-10">
+                    <div class="lg:w-1/2 space-y-6 text-center lg:text-left mt-8 lg:mt-0">
+                        <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md text-green-400 px-5 py-2 rounded-full font-bold text-sm shadow-sm border border-white/20">
+                            <span class="relative flex h-3 w-3">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                            </span>
+                            ২৪ ঘণ্টা চিকিৎসা সেবা উপলব্ধ
+                        </div>
+                        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.2]">
+                            আপনার সুস্বাস্থ্যের <br/>
+                            <span class="text-green-400">প্রতিশ্রুতি</span> আমাদের লক্ষ্য
+                        </h1>
+                        <p class="text-lg text-slate-200 leading-relaxed max-w-lg mx-auto lg:mx-0 font-medium">
+                            নির্ভুল ডায়াগনোসিস, বিশ্বস্ত সেবা, উন্নত পরীক্ষা এবং সঠিক ফলাফলের নিশ্চয়তা নিয়ে আপনার পাশে <span class="text-white font-bold">প্রতিশ্রুতি হেলথ্‌ পয়েন্ট</span>।
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
+                            <button onclick="openAppointmentModal()" class="bg-green-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-green-600/30 hover:bg-green-500 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                                <i class="ph-fill ph-phone-call text-xl"></i> অ্যাপয়েন্টমেন্ট নিন
+                            </button>
+                            <button onclick="showPage('pathology')" class="bg-white/10 backdrop-blur-md text-white border border-white/30 px-8 py-4 rounded-xl font-bold shadow-sm hover:bg-white hover:text-slate-800 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                                <i class="ph-fill ph-microscope text-xl"></i> ল্যাব পরিষেবা
+                            </button>
+                        </div>
+                    </div>
+                    <div class="lg:w-1/2 flex justify-center">
+                        <!-- High Graphics Banner Element -->
+                        <div class="relative bg-white/95 backdrop-blur-xl p-8 md:p-10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/50 max-w-md w-full transform lg:translate-x-4">
+                            <!-- Floating badges -->
+                            <div class="absolute -top-6 -left-6 bg-blue-600 text-white p-4 rounded-2xl shadow-lg transform -rotate-6">
+                                <i class="ph-fill ph-shield-check text-3xl"></i>
+                            </div>
+                            <div class="absolute -bottom-6 -right-6 bg-pink-500 text-white p-4 rounded-2xl shadow-lg transform rotate-6">
+                                <i class="ph-fill ph-gender-female text-3xl"></i>
+                            </div>
+
+                            <div class="text-center mb-8 mt-4">
+                                <h3 class="font-extrabold text-2xl text-slate-800 mb-2">আমাদের বিশেষত্ব</h3>
+                                <p class="text-sm text-slate-500 font-medium">মালদহের সুজাপুরে সর্বাধুনিক ক্লিনিক</p>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100 hover:shadow-md transition-shadow">
+                                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center text-2xl shrink-0"><i class="ph-fill ph-first-aid"></i></div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800">মাল্টিস্পেশালিটি ও.পি.ডি.</h4>
+                                        <p class="text-xs text-slate-500">বিশেষজ্ঞ ডাক্তারদের প্যানেল</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100 hover:shadow-md transition-shadow">
+                                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-2xl shrink-0"><i class="ph-fill ph-flask"></i></div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800">নির্ভুল ডায়াগনস্টিক</h4>
+                                        <p class="text-xs text-slate-500">ECG, X-Ray, USG, রক্ত পরীক্ষা</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100 hover:shadow-md transition-shadow">
+                                    <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center text-2xl shrink-0"><i class="ph-fill ph-house-line"></i></div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800">হোম সার্ভিস সুবিধা</h4>
+                                        <p class="text-xs text-slate-500">বাড়িতে গিয়ে রক্ত সংগ্রহ, ECG ও ড্রেসিং</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ================= PATHOLOGY & DIAGNOSTICS PAGE (NEW) ================= -->
+        <div id="pathology" class="page-section bg-slate-50 py-16">
+            <div class="container mx-auto px-4">
+                
+                <!-- Section Header -->
+                <div class="text-center mb-16 relative z-10">
+                    <span class="bg-blue-100 text-blue-700 font-extrabold tracking-widest uppercase text-xs px-4 py-1.5 rounded-full inline-block mb-4">অত্যাধুনিক ল্যাবরেটরি</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-slate-800 mb-4">প্যাথলজি ও ডায়াগনস্টিক</h2>
+                    <p class="text-lg text-slate-600 max-w-2xl mx-auto font-medium">নির্ভুল ডায়াগনোসিস, বিশ্বস্ত সেবা, উন্নত পরীক্ষা এবং সঠিক ফলাফল</p>
+                    <div class="w-24 h-1.5 bg-blue-500 mx-auto mt-6 rounded-full"></div>
+                </div>
+
+                <!-- Alert Badge (Female Technician) -->
+                <div class="max-w-3xl mx-auto mb-12 transform hover:scale-105 transition-transform">
+                    <div class="bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl p-1 shadow-lg shadow-pink-500/30">
+                        <div class="bg-white rounded-xl px-6 py-4 flex items-center justify-center gap-3 text-center">
+                            <i class="ph-fill ph-info text-3xl text-pink-500 animate-pulse"></i>
+                            <h3 class="text-lg md:text-xl font-bold text-slate-800">বিঃ দ্রঃ - আমাদের ল্যাবে <span class="text-pink-600">মহিলা টেকনেশিয়ান</span> আছেন।</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Diagnostic Services Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                    
+                    <!-- Digital X-Ray -->
+                    <div class="bg-white rounded-3xl p-8 shadow-lg border border-slate-100 hover:shadow-2xl hover:border-blue-200 transition-all group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -z-0 group-hover:scale-125 transition-transform"></div>
+                        <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-md shadow-blue-600/30 relative z-10"><i class="ph ph-files"></i></div>
+                        <h3 class="text-2xl font-extrabold text-slate-800 mb-3 relative z-10">ডিজিটাল এক্স-রে</h3>
+                        <p class="text-slate-600 font-medium relative z-10">সর্বাধুনিক ডিজিটাল মেশিনে শরীরের যেকোনো অংশের নিখুঁত এক্স-রে এবং সাথে সাথে রিপোর্ট প্রদান।</p>
+                    </div>
+
+                    <!-- ECG -->
+                    <div class="bg-white rounded-3xl p-8 shadow-lg border border-slate-100 hover:shadow-2xl hover:border-red-200 transition-all group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-bl-full -z-0 group-hover:scale-125 transition-transform"></div>
+                        <div class="w-16 h-16 bg-red-600 text-white rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-md shadow-red-600/30 relative z-10"><i class="ph ph-heartbeat"></i></div>
+                        <h3 class="text-2xl font-extrabold text-slate-800 mb-3 relative z-10">ই.সি.জি (ECG)</h3>
+                        <p class="text-slate-600 font-medium relative z-10">হার্টের অবস্থা নির্ণয়ের জন্য নির্ভুল ইসিজি। <br><span class="text-red-600 font-bold mt-2 inline-block"><i class="ph-fill ph-house-line"></i> বাড়িতে গিয়ে করার সুবিধাও আছে!</span></p>
+                    </div>
+
+                    <!-- USG -->
+                    <div class="bg-white rounded-3xl p-8 shadow-lg border border-slate-100 hover:shadow-2xl hover:border-teal-200 transition-all group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-bl-full -z-0 group-hover:scale-125 transition-transform"></div>
+                        <div class="w-16 h-16 bg-teal-600 text-white rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-md shadow-teal-600/30 relative z-10"><i class="ph ph-waves"></i></div>
+                        <h3 class="text-2xl font-extrabold text-slate-800 mb-3 relative z-10">ইউ.এস.জি (USG)</h3>
+                        <p class="text-slate-600 font-medium relative z-10">উন্নত প্রযুক্তির আল্ট্রাসনোগ্রাফি মেশিনে গর্ভবতী মায়েদের এবং পেটের অন্যান্য নিখুঁত পরীক্ষা।</p>
+                    </div>
+
+                    <!-- Echo -->
+                    <div class="bg-white rounded-3xl p-8 shadow-lg border border-slate-100 hover:shadow-2xl hover:border-purple-200 transition-all group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-purple-50 rounded-bl-full -z-0 group-hover:scale-125 transition-transform"></div>
+                        <div class="w-16 h-16 bg-purple-600 text-white rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-md shadow-purple-600/30 relative z-10"><i class="ph ph-activity"></i></div>
+                        <h3 class="text-2xl font-extrabold text-slate-800 mb-3 relative z-10">ইকো কার্ডিওগ্রাফি</h3>
+                        <p class="text-slate-600 font-medium relative z-10">হার্টের কার্যকারিতা এবং পাম্পিং ক্ষমতা দেখার জন্য স্পেশাল ইকো কার্ডিওগ্রাফি সুবিধা।</p>
+                    </div>
+
+                    <!-- Blood Tests -->
+                    <div class="bg-white rounded-3xl p-8 shadow-lg border border-slate-100 hover:shadow-2xl hover:border-rose-200 transition-all group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-rose-50 rounded-bl-full -z-0 group-hover:scale-125 transition-transform"></div>
+                        <div class="w-16 h-16 bg-rose-600 text-white rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-md shadow-rose-600/30 relative z-10"><i class="ph ph-drop"></i></div>
+                        <h3 class="text-2xl font-extrabold text-slate-800 mb-3 relative z-10">সমস্ত রকমের রক্ত পরীক্ষা</h3>
+                        <p class="text-slate-600 font-medium relative z-10">অটোমেটেড মেশিনে সুগার, থাইরয়েড, লিভার, কিডনি, লিপিড প্রোফাইল সহ সমস্ত প্যাথলজিক্যাল রক্ত পরীক্ষা।</p>
+                    </div>
+
+                    <!-- Stool & Urine -->
+                    <div class="bg-white rounded-3xl p-8 shadow-lg border border-slate-100 hover:shadow-2xl hover:border-amber-200 transition-all group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-bl-full -z-0 group-hover:scale-125 transition-transform"></div>
+                        <div class="w-16 h-16 bg-amber-500 text-white rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-md shadow-amber-500/30 relative z-10"><i class="ph ph-test-tube"></i></div>
+                        <h3 class="text-2xl font-extrabold text-slate-800 mb-3 relative z-10">মল, মূত্র ও কফ পরীক্ষা</h3>
+                        <p class="text-slate-600 font-medium relative z-10">ইনফেকশন বা অন্যান্য রোগ নির্ণয়ের জন্য আধুনিক ল্যাবে মল (Stool), মূত্র (Urine) ও কফ (Sputum) পরীক্ষা।</p>
+                    </div>
+
+                </div>
+
+                <!-- Banner: Home Service -->
+                <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-[2rem] p-8 md:p-12 text-white shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/medical-icons.png')] opacity-10"></div>
+                    <div class="relative z-10 md:w-2/3 text-center md:text-left">
+                        <div class="inline-block bg-white/20 px-4 py-1.5 rounded-full text-sm font-bold tracking-widest uppercase mb-4 backdrop-blur-sm border border-white/30">
+                            হোম সার্ভিস
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-extrabold mb-4 leading-tight">ল্যাবে আসতে পারছেন না? <br>আমরা আসছি আপনার বাড়িতে!</h2>
+                        <ul class="text-blue-100 space-y-2 font-medium text-lg mb-6 inline-block text-left">
+                            <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-green-400"></i> বাড়ি গিয়ে রক্ত সংগ্রহ করা হয়।</li>
+                            <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-green-400"></i> ECG ও ড্রেসিং বাড়িতে গিয়ে করার সুবিধা আছে।</li>
+                        </ul>
+                    </div>
+                    <div class="relative z-10 md:w-1/3 flex justify-center md:justify-end">
+                        <button onclick="showPage('contact')" class="bg-white text-blue-700 px-8 py-4 rounded-xl font-extrabold text-lg shadow-xl hover:bg-blue-50 transition-colors flex items-center gap-3 w-full md:w-auto justify-center">
+                            <i class="ph-fill ph-phone-call text-2xl"></i> কল করুন
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= CLINIC & NURSING SERVICES PAGE (UPDATED) ================= -->
+        <div id="services" class="page-section bg-white py-16">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <span class="text-green-600 font-bold tracking-wider uppercase text-sm">আমাদের সেবাসমূহ</span>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 mt-2">ক্লিনিক ও নার্সিং পরিষেবা</h2>
+                    <div class="w-24 h-1.5 bg-green-500 mx-auto mt-4 rounded-full"></div>
+                    <p class="text-slate-600 mt-4 max-w-2xl mx-auto font-medium">ডায়াগনস্টিক ছাড়াও আমাদের ক্লিনিকে ২৪ ঘণ্টা ইমার্জেন্সি ও নার্সিং পরিষেবা প্রদান করা হয়।</p>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    
+                    <!-- 24/7 Doctor -->
+                    <div class="flex flex-col p-8 rounded-[2rem] bg-slate-50 border border-slate-100 hover:border-green-300 hover:shadow-xl transition-all">
+                        <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center text-green-600 shadow-sm text-3xl mb-6"><i class="ph-fill ph-stethoscope"></i></div>
+                        <h3 class="text-xl font-extrabold text-slate-800 mb-3">২৪ ঘণ্টা জেনারেল ফিজিসিয়ান</h3>
+                        <p class="text-slate-600 font-medium">যে কোনো জরুরি পরিস্থিতিতে ২৪ ঘণ্টা আমাদের জেনারেল ফিজিসিয়ানের পরামর্শ ও প্রাথমিক চিকিৎসা উপলব্ধ।</p>
+                    </div>
+
+                    <!-- Multispecialty OPD -->
+                    <div class="flex flex-col p-8 rounded-[2rem] bg-slate-50 border border-slate-100 hover:border-blue-300 hover:shadow-xl transition-all">
+                        <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 shadow-sm text-3xl mb-6"><i class="ph-fill ph-users"></i></div>
+                        <h3 class="text-xl font-extrabold text-slate-800 mb-3">মাল্টি স্পেশালিটি ও.পি.ডি</h3>
+                        <p class="text-slate-600 font-medium">কলকাতার এবং মালদহের বিভিন্ন স্বনামধন্য হাসপাতালের বিশেষজ্ঞ ডাক্তারদের দ্বারা নিয়মিত রোগী দেখা হয়।</p>
+                    </div>
+
+                    <!-- Dressing & Stitching -->
+                    <div class="flex flex-col p-8 rounded-[2rem] bg-slate-50 border border-slate-100 hover:border-orange-300 hover:shadow-xl transition-all">
+                        <div class="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 shadow-sm text-3xl mb-6"><i class="ph-fill ph-bandaids"></i></div>
+                        <h3 class="text-xl font-extrabold text-slate-800 mb-3">ড্রেসিং ও সেলাই</h3>
+                        <p class="text-slate-600 font-medium">দুর্ঘটনা বা আঘাতের ক্ষেত্রে কাটা ছেঁড়া সেলাই করা এবং যত্ন সহকারে ড্রেসিং করার ব্যবস্থা রয়েছে (বাড়িতে গিয়েও করা হয়)।</p>
+                    </div>
+
+                    <!-- Catheter -->
+                    <div class="flex flex-col p-8 rounded-[2rem] bg-slate-50 border border-slate-100 hover:border-teal-300 hover:shadow-xl transition-all">
+                        <div class="w-16 h-16 bg-teal-100 rounded-2xl flex items-center justify-center text-teal-600 shadow-sm text-3xl mb-6"><i class="ph-fill ph-pipe"></i></div>
+                        <h3 class="text-xl font-extrabold text-slate-800 mb-3">ক্যাথেটার পড়ানো ও চেঞ্জ করা</h3>
+                        <p class="text-slate-600 font-medium">অভিজ্ঞ নার্সিং স্টাফ দ্বারা অত্যন্ত সাবধানে রোগীদের ক্যাথেটার পড়ানো এবং পরিবর্তন করার সুবিধা রয়েছে।</p>
+                    </div>
+
+                    <!-- Nebulization -->
+                    <div class="flex flex-col p-8 rounded-[2rem] bg-slate-50 border border-slate-100 hover:border-cyan-300 hover:shadow-xl transition-all">
+                        <div class="w-16 h-16 bg-cyan-100 rounded-2xl flex items-center justify-center text-cyan-600 shadow-sm text-3xl mb-6"><i class="ph-fill ph-wind"></i></div>
+                        <h3 class="text-xl font-extrabold text-slate-800 mb-3">নেবুলাইজেশন (গ্যাস) সুবিধা</h3>
+                        <p class="text-slate-600 font-medium">শ্বাসকষ্ট বা হাঁপানির রোগীদের জন্য (শিশু এবং বয়স্ক উভয়ের জন্যই) ক্লিনিকে নেবুলাইজেশন দেওয়ার সম্পূর্ণ সুবিধা আছে।</p>
+                    </div>
+
+                    <!-- Pharmacy -->
+                    <div class="flex flex-col p-8 rounded-[2rem] bg-slate-50 border border-slate-100 hover:border-rose-300 hover:shadow-xl transition-all">
+                        <div class="w-16 h-16 bg-rose-100 rounded-2xl flex items-center justify-center text-rose-600 shadow-sm text-3xl mb-6"><i class="ph-fill ph-pills"></i></div>
+                        <h3 class="text-xl font-extrabold text-slate-800 mb-3">ফার্মেসি ও ঔষধ</h3>
+                        <p class="text-slate-600 font-medium">আমাদের ফার্মেসিতে সমস্ত প্রেসক্রিপশনের ঔষধ অর্ডার নেওয়া হয় এবং ন্যায্য মূল্যে সরবরাহ করা হয়।</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= DOCTORS PAGE (Unchanged from before) ================= -->
+        <div id="doctors" class="page-section bg-slate-50 py-16">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <span class="text-green-600 font-bold tracking-wider uppercase text-sm">বিশেষজ্ঞ প্যানেল</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-slate-800 mt-2">আমাদের অভিজ্ঞ ডাক্তারগণ</h2>
+                    <div class="w-24 h-1.5 bg-green-500 mx-auto mt-4 rounded-full"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
+                    <!-- Doctor 1: MD SARWAR HOSSAIN -->
+                    <div class="bg-white rounded-3xl shadow-lg overflow-hidden flex flex-col hover:shadow-2xl transition-all duration-300 border border-slate-100 relative group">
+                        <div class="doc-bg-1 h-28 absolute top-0 w-full rounded-b-[30%]"></div>
+                        <div class="px-6 pt-12 pb-6 flex-grow flex flex-col relative z-10 text-center">
+                            <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200&h=200" alt="Dr Sarwar" class="w-28 h-28 rounded-full object-cover border-4 border-white shadow-xl mx-auto mb-5 bg-white group-hover:scale-105 transition-transform">
+                            <h3 class="font-extrabold text-slate-800 text-lg mb-1 uppercase tracking-wide">DR MD SARWAR HOSSAIN</h3>
+                            <p class="text-blue-600 text-sm font-bold mb-3 border-b border-slate-100 pb-3">Pediatrician & Neonatologist</p>
+                            <div class="text-xs text-slate-600 space-y-1.5 mb-6 flex-grow font-medium">
+                                <p class="text-slate-800 font-bold">MBBS (NRSMCH)</p>
+                                <p class="text-slate-800 font-bold">MD Pediatrics (CNMCH)</p>
+                                <p>PGPN (Boston University, USA)</p>
+                                <p>Ex-Non-Acad JR in Pediatrics, AIIMS Kalyani</p>
+                            </div>
+                            <button onclick="openAppointmentModal()" class="w-full py-3 rounded-xl doc-bg-1 text-white text-sm font-bold shadow-md hover:bg-blue-700 transition-colors">সিরিয়াল বুক করুন</button>
+                        </div>
+                    </div>
+
+                    <!-- Doctor 2: MOHIDUR RAHAMAN -->
+                    <div class="bg-white rounded-3xl shadow-lg overflow-hidden flex flex-col hover:shadow-2xl transition-all duration-300 border border-slate-100 relative group">
+                        <div class="doc-bg-2 h-28 absolute top-0 w-full rounded-b-[30%]"></div>
+                        <div class="px-6 pt-12 pb-6 flex-grow flex flex-col relative z-10 text-center">
+                            <img src="https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=200&h=200" alt="Dr Mohidur" class="w-28 h-28 rounded-full object-cover border-4 border-white shadow-xl mx-auto mb-5 bg-white group-hover:scale-105 transition-transform">
+                            <h3 class="font-extrabold text-slate-800 text-lg mb-1 uppercase tracking-wide">DR MOHIDUR RAHAMAN</h3>
+                            <p class="text-orange-600 text-sm font-bold mb-3 border-b border-slate-100 pb-3">Diabetic & Medicine</p>
+                            <div class="text-xs text-slate-600 space-y-1.5 mb-6 flex-grow font-medium">
+                                <p class="text-slate-800 font-bold">MBBS, DNB (INTERNAL MEDICINE)</p>
+                                <p class="text-slate-800 font-bold">MRCP-1 (UK)</p>
+                                <p class="mt-2 text-[11px] text-slate-500">ডায়াবেটিস, উচ্চ রক্তচাপ, থাইরয়েড রোগ, জ্বর, সংক্রমণ, হাঁপানি, সিওপিডি, হার্ট ও কিডনি সমস্যা</p>
+                            </div>
+                            <button onclick="openAppointmentModal()" class="w-full py-3 rounded-xl doc-bg-2 text-white text-sm font-bold shadow-md hover:bg-orange-700 transition-colors">সিরিয়াল বুক করুন</button>
+                        </div>
+                    </div>
+
+                    <!-- Doctor 3: MD ASIF IQBAL -->
+                    <div class="bg-white rounded-3xl shadow-lg overflow-hidden flex flex-col hover:shadow-2xl transition-all duration-300 border border-slate-100 relative group">
+                        <div class="doc-bg-3 h-28 absolute top-0 w-full rounded-b-[30%]"></div>
+                        <div class="px-6 pt-12 pb-6 flex-grow flex flex-col relative z-10 text-center">
+                            <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=200&h=200" alt="Dr Asif" class="w-28 h-28 rounded-full object-cover border-4 border-white shadow-xl mx-auto mb-5 bg-white group-hover:scale-105 transition-transform">
+                            <h3 class="font-extrabold text-slate-800 text-lg mb-1 uppercase tracking-wide">DR MD ASIF IQBAL</h3>
+                            <p class="text-green-600 text-sm font-bold mb-3 border-b border-slate-100 pb-3">Orthopaedic Surgeon</p>
+                            <div class="text-xs text-slate-600 space-y-1.5 mb-6 flex-grow font-medium">
+                                <p class="text-slate-800 font-bold">MBBS, MS ORTHO (DELHI)</p>
+                                <p>Malda Medical College and Hospital</p>
+                            </div>
+                            <button onclick="openAppointmentModal()" class="w-full py-3 rounded-xl doc-bg-3 text-white text-sm font-bold shadow-md hover:bg-green-700 transition-colors">সিরিয়াল বুক করুন</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Doctor 4: BIPLOB MANDAL -->
+                    <div class="bg-white rounded-3xl shadow-lg overflow-hidden flex flex-col hover:shadow-2xl transition-all duration-300 border border-slate-100 relative group">
+                        <div class="doc-bg-4 h-28 absolute top-0 w-full rounded-b-[30%]"></div>
+                        <div class="px-6 pt-12 pb-6 flex-grow flex flex-col relative z-10 text-center">
+                            <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=200&h=200" alt="Dr Biplob" class="w-28 h-28 rounded-full object-cover border-4 border-white shadow-xl mx-auto mb-5 bg-white group-hover:scale-105 transition-transform">
+                            <h3 class="font-extrabold text-slate-800 text-lg mb-1 uppercase tracking-wide">DR. BIPLOB MANDAL</h3>
+                            <p class="text-purple-700 text-sm font-bold mb-3 border-b border-slate-100 pb-3">Laparoscopic Surgeon<br><span class="text-xs font-medium text-slate-500">Consultant Gynecologist</span></p>
+                            <div class="text-xs text-slate-600 space-y-1.5 mb-6 flex-grow font-medium">
+                                <p class="text-slate-800 font-bold">MBBS, (Kol) MS (Obst. & Gynecology)</p>
+                                <p>Malda Medical College & Hospital</p>
+                            </div>
+                            <button onclick="openAppointmentModal()" class="w-full py-3 rounded-xl doc-bg-4 text-white text-sm font-bold shadow-md hover:bg-purple-800 transition-colors">সিরিয়াল বুক করুন</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Doctor 5: SATYADIP SARKAR -->
+                    <div class="bg-white rounded-3xl shadow-lg overflow-hidden flex flex-col hover:shadow-2xl transition-all duration-300 border border-slate-100 relative group">
+                        <div class="doc-bg-5 h-28 absolute top-0 w-full rounded-b-[30%]"></div>
+                        <div class="px-6 pt-12 pb-6 flex-grow flex flex-col relative z-10 text-center">
+                            <img src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&q=80&w=200&h=200" alt="Dr Satyadip" class="w-28 h-28 rounded-full object-cover border-4 border-white shadow-xl mx-auto mb-5 bg-white group-hover:scale-105 transition-transform">
+                            <h3 class="font-extrabold text-slate-800 text-lg mb-1 uppercase tracking-wide">DR SATYADIP SARKAR</h3>
+                            <p class="text-red-600 text-sm font-bold mb-3 border-b border-slate-100 pb-3">DM (Neuro), (PDT)</p>
+                            <div class="text-xs text-slate-600 space-y-1.5 mb-6 flex-grow font-medium">
+                                <p class="text-slate-800 font-bold">M.B.B.S. (Hons.)</p>
+                                <p class="text-slate-800 font-bold">MD (Internal Medicine)</p>
+                                <p>Attached to Bangur Institute of Neurosciences</p>
+                            </div>
+                            <button onclick="openAppointmentModal()" class="w-full py-3 rounded-xl doc-bg-5 text-white text-sm font-bold shadow-md hover:bg-red-700 transition-colors">সিরিয়াল বুক করুন</button>
+                        </div>
+                    </div>
+
+                    <!-- Doctor 6: WASHIM AKRAM -->
+                    <div class="bg-white rounded-3xl shadow-lg overflow-hidden flex flex-col hover:shadow-2xl transition-all duration-300 border border-slate-100 relative group">
+                        <div class="doc-bg-6 h-28 absolute top-0 w-full rounded-b-[30%]"></div>
+                        <div class="px-6 pt-12 pb-6 flex-grow flex flex-col relative z-10 text-center">
+                            <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200&h=200" alt="Dr Washim" class="w-28 h-28 rounded-full object-cover border-4 border-white shadow-xl mx-auto mb-5 bg-white group-hover:scale-105 transition-transform">
+                            <h3 class="font-extrabold text-slate-800 text-lg mb-1 uppercase tracking-wide">DR. WASHIM AKRAM</h3>
+                            <p class="text-cyan-600 text-sm font-bold mb-3 border-b border-slate-100 pb-3">General Physician</p>
+                            <div class="text-xs text-slate-600 space-y-1.5 mb-6 flex-grow font-medium">
+                                <p class="text-slate-800 font-bold">(M.B.B.S) (NRSMCH)</p>
+                                <p>Ex-House Surgeon Paed Surgery (NRSMCH)</p>
+                                <p>Medical Officer Hemtabad Rural Hospital, Raiganj</p>
+                            </div>
+                            <button onclick="openAppointmentModal()" class="w-full py-3 rounded-xl doc-bg-6 text-white text-sm font-bold shadow-md hover:bg-cyan-700 transition-colors">সিরিয়াল বুক করুন</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Doctor 7: NILDIP SINHA -->
+                    <div class="bg-white rounded-3xl shadow-lg overflow-hidden flex flex-col hover:shadow-2xl transition-all duration-300 border border-slate-100 relative group">
+                        <div class="doc-bg-7 h-28 absolute top-0 w-full rounded-b-[30%]"></div>
+                        <div class="px-6 pt-12 pb-6 flex-grow flex flex-col relative z-10 text-center">
+                            <img src="https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=200&h=200" alt="Dr Nildip" class="w-28 h-28 rounded-full object-cover border-4 border-white shadow-xl mx-auto mb-5 bg-white group-hover:scale-105 transition-transform">
+                            <h3 class="font-extrabold text-slate-800 text-lg mb-1 uppercase tracking-wide">DR NILDIP SINHA</h3>
+                            <p class="text-indigo-600 text-sm font-bold mb-3 border-b border-slate-100 pb-3">General & Laparoscopic Surgeon</p>
+                            <div class="text-xs text-slate-600 space-y-1.5 mb-6 flex-grow font-medium">
+                                <p class="text-slate-800 font-bold">M.B.B.S. (N.R.S.M.C.H.)</p>
+                                <p class="text-slate-800 font-bold">D.N.B. (General Surgery)</p>
+                                <p>Malda Medical College & Hospital</p>
+                                <p>Previously Attached to Peerless Hospital, Kolkata</p>
+                            </div>
+                            <button onclick="openAppointmentModal()" class="w-full py-3 rounded-xl doc-bg-7 text-white text-sm font-bold shadow-md hover:bg-indigo-700 transition-colors">সিরিয়াল বুক করুন</button>
+                        </div>
+                    </div>
+
+                    <!-- Doctor 8: SAJIDUL ISLAM -->
+                    <div class="bg-white rounded-3xl shadow-lg overflow-hidden flex flex-col hover:shadow-2xl transition-all duration-300 border border-slate-100 relative group">
+                        <div class="doc-bg-8 h-28 absolute top-0 w-full rounded-b-[30%]"></div>
+                        <div class="px-6 pt-12 pb-6 flex-grow flex flex-col relative z-10 text-center">
+                            <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=200&h=200" alt="Dr Sajidul" class="w-28 h-28 rounded-full object-cover border-4 border-white shadow-xl mx-auto mb-5 bg-white group-hover:scale-105 transition-transform">
+                            <h3 class="font-extrabold text-slate-800 text-lg mb-1 uppercase tracking-wide">DR SAJIDUL ISLAM</h3>
+                            <p class="text-teal-700 text-sm font-bold mb-3 border-b border-slate-100 pb-3">General Physician</p>
+                            <div class="text-xs text-slate-600 space-y-1.5 mb-6 flex-grow font-medium">
+                                <p class="text-slate-800 font-bold">MBBS (RGMCH)</p>
+                                <p>Raiganj Medical College & Hospital</p>
+                            </div>
+                            <button onclick="openAppointmentModal()" class="w-full py-3 rounded-xl doc-bg-8 text-white text-sm font-bold shadow-md hover:bg-teal-800 transition-colors">সিরিয়াল বুক করুন</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= ADMIN DASHBOARD (HIDDEN) ================= -->
+        <div id="admin-panel" class="page-section bg-slate-100 min-h-screen py-10 relative z-[60]">
+            <div class="container mx-auto px-4 max-w-6xl">
+                
+                <!-- Admin Login Section -->
+                <div id="admin-login-section" class="max-w-md mx-auto bg-white p-8 rounded-3xl shadow-xl mt-20">
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 bg-slate-900 text-white rounded-full flex items-center justify-center text-3xl mx-auto mb-4"><i class="ph-fill ph-lock-key"></i></div>
+                        <h2 class="text-2xl font-bold text-slate-800">অ্যাডমিন লগইন</h2>
+                        <p class="text-slate-500 text-sm mt-2">রোগীদের ডেটা দেখতে পাসওয়ার্ড দিন</p>
+                    </div>
+                    <form onsubmit="adminLogin(event)" class="space-y-5">
+                        <div>
+                            <input type="password" id="admin-password" placeholder="পাসওয়ার্ড দিন" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-slate-800 focus:ring-2 focus:ring-slate-200 outline-none text-center font-mono text-lg tracking-widest">
+                        </div>
+                        <button type="submit" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-colors">লগইন করুন</button>
+                        <button type="button" onclick="showPage('home')" class="w-full bg-transparent text-slate-500 font-bold py-2 rounded-xl hover:text-slate-800 transition-colors mt-2 text-sm">ফিরে যান</button>
+                    </form>
+                </div>
+
+                <!-- Admin Dashboard Section (Visible after login) -->
+                <div id="admin-dashboard-section" class="hidden">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm">
+                        <div class="flex items-center gap-4 mb-4 md:mb-0">
+                            <div class="bg-slate-900 text-white p-3 rounded-xl"><i class="ph-fill ph-database text-2xl"></i></div>
+                            <div>
+                                <h2 class="text-2xl font-bold text-slate-800">পেশেন্ট ডেটাবেস</h2>
+                                <p class="text-slate-500 text-sm">নতুন বুকিং রিকোয়েস্ট সমূহ</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="loadAppointments()" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-lg font-bold hover:bg-blue-100 transition-colors flex items-center gap-2">
+                                <i class="ph ph-arrows-clockwise"></i> রিফ্রেশ
+                            </button>
+                            <button onclick="adminLogout()" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg font-bold hover:bg-red-100 transition-colors flex items-center gap-2">
+                                <i class="ph ph-sign-out"></i> লগআউট
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Loading Indicator -->
+                    <div id="admin-loading" class="text-center py-12 hidden">
+                        <i class="ph ph-spinner animate-spin text-4xl text-slate-400 mx-auto"></i>
+                        <p class="text-slate-500 mt-3 font-medium">ডেটা লোড হচ্ছে...</p>
+                    </div>
+
+                    <!-- Data Table -->
+                    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 text-sm uppercase tracking-wider">
+                                        <th class="p-4 font-bold">তারিখ ও সময়</th>
+                                        <th class="p-4 font-bold">রোগীর নাম</th>
+                                        <th class="p-4 font-bold">ফোন নম্বর</th>
+                                        <th class="p-4 font-bold">মন্তব্য / ডাক্তারের নাম</th>
+                                        <th class="p-4 font-bold text-center">অ্যাকশন</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="appointments-table-body" class="divide-y divide-slate-100">
+                                    <!-- Rows will be populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Empty State -->
+                        <div id="admin-empty-state" class="text-center py-16 hidden">
+                            <i class="ph-fill ph-folder-open text-6xl text-slate-300 mb-4"></i>
+                            <h3 class="text-xl font-bold text-slate-700">কোনো বুকিং নেই</h3>
+                            <p class="text-slate-500 mt-2">এখনো কেউ অ্যাপয়েন্টমেন্ট রিকোয়েস্ট পাঠায়নি।</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= APPOINTMENT MODAL ================= -->
+        <div id="appointment-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 opacity-0">
+            <div class="bg-white rounded-3xl shadow-2xl w-[95%] max-w-md p-8 md:p-10 relative transform scale-95 transition-transform duration-300" id="appointment-modal-content">
+                <!-- Close Button -->
+                <button onclick="closeAppointmentModal()" class="absolute top-5 right-5 text-slate-400 hover:text-red-500 transition-colors text-3xl">
+                    <i class="ph-fill ph-x-circle"></i>
+                </button>
+                
+                <div class="mb-8 text-center">
+                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                        <i class="ph-fill ph-calendar-plus"></i>
+                    </div>
+                    <h3 class="text-2xl font-extrabold text-slate-800 mb-2">সিরিয়াল বুকিং ফর্ম</h3>
+                    <p class="text-sm text-slate-500 font-medium">দয়া করে আপনার সঠিক তথ্য দিন, আমরা আপনার সাথে খুব তাড়াতাড়ি যোগাযোগ করব।</p>
+                </div>
+                
+                <form onsubmit="submitAppointment(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">রোগীর নাম <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <i class="ph ph-user absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-lg"></i>
+                            <input type="text" id="pat_name" required class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all font-medium text-slate-700" placeholder="রোগীর পুরো নাম লিখুন">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">ফোন নম্বর <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <i class="ph ph-phone absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-lg"></i>
+                            <input type="tel" id="pat_phone" required pattern="[0-9]{10}" title="10 ডিজিটের মোবাইল নম্বর লিখুন" class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all font-medium text-slate-700" placeholder="১০ ডিজিটের মোবাইল নম্বর">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">ডাক্তারের নাম বা অন্যান্য মন্তব্য</label>
+                        <textarea id="pat_comment" rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all font-medium text-slate-700" placeholder="কোন ডাক্তার দেখাতে চান বা রোগীর সমস্যা সংক্ষেপে লিখুন..."></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-green-500 text-white font-extrabold py-4 rounded-xl hover:shadow-lg hover:shadow-green-600/30 transition-all mt-4 flex items-center justify-center gap-2 text-lg">
+                        <i class="ph-fill ph-paper-plane-tilt"></i> বুকিং কনফার্ম করুন
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-16 border-t border-slate-800">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
+                <div>
+                    <!-- Hidden Admin Trigger: Double click logo in footer -->
+                    <h3 ondblclick="showPage('admin-panel')" class="text-white text-2xl font-extrabold mb-6 flex items-center justify-center md:justify-start gap-2 cursor-pointer cursor-default select-none" title="Double click for admin">
+                        <i class="ph-fill ph-heartbeat text-green-500 text-3xl"></i> প্রতিশ্রুতি হেলথ্‌ পয়েন্ট
+                    </h3>
+                    <p class="text-[15px] leading-relaxed font-medium text-slate-400">নির্ভুল ডায়াগনসিস এবং বিশ্বস্ত সেবার এক অনন্য প্রতিষ্ঠান। আপনাদের সুস্বাস্থ্যের জন্য মালদহের সুজাপুরে আমরা ২৪ ঘণ্টা তৎপর।</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-extrabold mb-6 text-lg tracking-wide uppercase">দ্রুত লিঙ্ক</h4>
+                    <div class="flex flex-col gap-4 text-[15px] font-medium">
+                        <button onclick="showPage('home')" class="hover:text-green-400 text-left w-max mx-auto md:mx-0 transition-colors flex items-center gap-2"><i class="ph-fill ph-caret-right"></i> হোম পেজ</button>
+                        <button onclick="showPage('doctors')" class="hover:text-green-400 text-left w-max mx-auto md:mx-0 transition-colors flex items-center gap-2"><i class="ph-fill ph-caret-right"></i> ডাক্তারদের তালিকা</button>
+                        <button onclick="showPage('pathology')" class="hover:text-green-400 text-left w-max mx-auto md:mx-0 transition-colors flex items-center gap-2"><i class="ph-fill ph-caret-right"></i> প্যাথলজি ও ডায়াগনস্টিক</button>
+                        <button onclick="showPage('services')" class="hover:text-green-400 text-left w-max mx-auto md:mx-0 transition-colors flex items-center gap-2"><i class="ph-fill ph-caret-right"></i> ক্লিনিক ও নার্সিং সেবা</button>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-white font-extrabold mb-6 text-lg tracking-wide uppercase">যোগাযোগ</h4>
+                    <p class="text-[15px] mb-4 font-medium">যেকোনো প্রয়োজনে সরাসরি কল করুন:</p>
+                    <a href="tel:9933952899" class="text-3xl font-extrabold text-green-500 hover:text-green-400 transition-colors block font-mono tracking-tight">9933952899</a>
+                    <a href="tel:6297913318" class="text-2xl font-extrabold text-slate-300 hover:text-white transition-colors mt-3 block font-mono tracking-tight">6297913318</a>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 mt-16 pt-8 text-center text-sm font-medium text-slate-500">
+                <p>© ২০২৪ <span class="text-slate-400 font-bold">প্রতিশ্রুতি হেলথ্‌ পয়েন্ট</span> | সর্বস্বত্ব সংরক্ষিত</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration & Initialization
+        let app, auth, db;
+        
+        try {
+            // Use environment config if available (Canvas environment)
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+                // If not in Canvas, we still need an initialized app object to prevent errors, 
+                // but real saving might not work without actual config.
+                // We will use localStorage as a fallback so you can see it working immediately.
+                fallbackMode: true
+            };
+            
+            if (firebaseConfig && !firebaseConfig.fallbackMode) {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+            }
+        } catch (error) {
+            console.error("Firebase init error:", error);
+        }
+
+        // Global variables for DB paths
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pratisruti-health-app';
+        let currentUser = null;
+        let unsubscribeAppointments = null;
+
+        // Make global functions available to inline event handlers
+        window.submitAppointment = async function(event) {
+            event.preventDefault();
+            
+            const nameInput = document.getElementById('pat_name');
+            const phoneInput = document.getElementById('pat_phone');
+            const commentInput = document.getElementById('pat_comment');
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            
+            const name = nameInput.value.trim();
+            const phone = phoneInput.value.trim();
+            const comment = commentInput.value.trim();
+
+            if(!name || !phone) return;
+
+            // Loading state
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> সাবমিট হচ্ছে...';
+            submitBtn.disabled = true;
+
+            try {
+                // IMPORTANT: Ensure user is authenticated anonymously before writing
+                if (auth && !auth.currentUser) {
+                    await signInAnonymously(auth);
+                }
+
+                if (db && auth && auth.currentUser) {
+                    // Store in public/data for this app so admin can read it without complex auth setup
+                    const appointmentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'appointments');
+                    
+                    await addDoc(appointmentsRef, {
+                        name: name,
+                        phone: phone,
+                        comment: comment,
+                        createdAt: serverTimestamp(),
+                        status: 'new'
+                    });
+                } else {
+                    // --- FALLBACK MODE (Saves to Browser Memory) ---
+                    // If database is not connected, save locally so it works for you right now
+                    let localAppointments = JSON.parse(localStorage.getItem('pratisruti_appointments') || '[]');
+                    localAppointments.push({
+                        id: Date.now().toString(),
+                        name: name,
+                        phone: phone,
+                        comment: comment,
+                        createdAt: new Date().toISOString(),
+                        local: true
+                    });
+                    localStorage.setItem('pratisruti_appointments', JSON.stringify(localAppointments));
+                }
+                
+                alert(`ধন্যবাদ ${name}! আপনার বুকিং রিকোয়েস্ট সফলভাবে জমা হয়েছে। আমরা খুব শীঘ্রই আপনার ${phone} নম্বরে যোগাযোগ করব।`);
+                
+                // Close Modal & Reset form
+                window.closeAppointmentModal();
+                event.target.reset();
+                
+                // If admin panel is open, refresh data
+                if(!document.getElementById('admin-dashboard-section').classList.contains('hidden')) {
+                    window.loadAppointments();
+                }
+
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert(`দুঃখিত, সাবমিট করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।`);
+            } finally {
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+            }
+        };
+
+        // --- Admin Functions ---
+        
+        // Secret password (in real life, use proper auth. keeping it simple here)
+        const ADMIN_PASS = "12345"; 
+
+        window.adminLogin = function(event) {
+            event.preventDefault();
+            const pass = document.getElementById('admin-password').value;
+            
+            if (pass === ADMIN_PASS) {
+                document.getElementById('admin-login-section').classList.add('hidden');
+                document.getElementById('admin-dashboard-section').classList.remove('hidden');
+                document.getElementById('admin-password').value = '';
+                
+                // Load data
+                window.loadAppointments();
+            } else {
+                alert("ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।");
+            }
+        };
+
+        window.adminLogout = function() {
+            document.getElementById('admin-login-section').classList.remove('hidden');
+            document.getElementById('admin-dashboard-section').classList.add('hidden');
+            
+            // Stop listening to data
+            if(unsubscribeAppointments) {
+                unsubscribeAppointments();
+                unsubscribeAppointments = null;
+            }
+        };
+
+        window.loadAppointments = async function() {
+            document.getElementById('admin-loading').classList.remove('hidden');
+            document.getElementById('appointments-table-body').innerHTML = '';
+            document.getElementById('admin-empty-state').classList.add('hidden');
+
+            // --- FUNCTION TO RENDER TABLE ROWS ---
+            const renderTable = (appointments) => {
+                const tbody = document.getElementById('appointments-table-body');
+                tbody.innerHTML = '';
+
+                if (appointments.length === 0) {
+                    document.getElementById('admin-empty-state').classList.remove('hidden');
+                    return;
+                }
+
+                document.getElementById('admin-empty-state').classList.add('hidden');
+                
+                appointments.forEach((data) => {
+                    // Format date safely
+                    let dateStr = "Recently";
+                    try {
+                        let dateObj;
+                        if (data.createdAt && data.createdAt.toDate) {
+                            dateObj = data.createdAt.toDate(); // Firestore timestamp
+                        } else if (data.createdAt) {
+                            dateObj = new Date(data.createdAt); // Local ISO string
+                        }
+                        
+                        if(dateObj) {
+                            dateStr = dateObj.toLocaleDateString('bn-IN') + ' ' + dateObj.toLocaleTimeString('bn-IN', {hour: '2-digit', minute:'2-digit'});
+                        }
+                    } catch(e) { console.log(e); }
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition-colors group";
+                    tr.innerHTML = `
+                        <td class="p-4 border-b border-slate-100 text-sm text-slate-500 whitespace-nowrap">${dateStr}</td>
+                        <td class="p-4 border-b border-slate-100 font-bold text-slate-800">${data.name}</td>
+                        <td class="p-4 border-b border-slate-100 font-mono text-blue-600 font-bold">
+                            <a href="tel:${data.phone}" class="hover:underline flex items-center gap-1"><i class="ph-fill ph-phone text-slate-400"></i> ${data.phone}</a>
+                        </td>
+                        <td class="p-4 border-b border-slate-100 text-sm text-slate-600 max-w-xs truncate" title="${data.comment || '-'}">${data.comment || '-'}</td>
+                        <td class="p-4 border-b border-slate-100 text-center">
+                            <button onclick="deleteAppointment('${data.id}', ${data.local ? 'true' : 'false'})" class="text-slate-300 hover:text-red-500 transition-colors p-2" title="Delete">
+                                <i class="ph-fill ph-trash text-xl"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            };
+
+            if (!db) {
+                // --- FALLBACK MODE: Read from LocalStorage ---
+                setTimeout(() => {
+                    document.getElementById('admin-loading').classList.add('hidden');
+                    let localAppointments = JSON.parse(localStorage.getItem('pratisruti_appointments') || '[]');
+                    // Sort newest first
+                    localAppointments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    renderTable(localAppointments);
+                }, 500); // Fake loading delay
+                return;
+            }
+
+            try {
+                // IMPORTANT: Ensure authenticated
+                if (auth && !auth.currentUser) {
+                    await signInAnonymously(auth);
+                }
+
+                const appointmentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'appointments');
+                // Use simple query without orderBy to avoid index requirement errors as per rules
+                const q = query(appointmentsRef);
+
+                if(unsubscribeAppointments) unsubscribeAppointments();
+
+                unsubscribeAppointments = onSnapshot(q, (snapshot) => {
+                    document.getElementById('admin-loading').classList.add('hidden');
+                    
+                    // Client side sorting to avoid index requirements
+                    let appointments = [];
+                    snapshot.forEach((doc) => {
+                        appointments.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    // Sort by newest first
+                    appointments.sort((a, b) => {
+                        const timeA = a.createdAt?.toMillis() || 0;
+                        const timeB = b.createdAt?.toMillis() || 0;
+                        return timeB - timeA;
+                    });
+
+                    renderTable(appointments);
+                    
+                }, (error) => {
+                    console.error("Error fetching data: ", error);
+                    document.getElementById('admin-loading').classList.add('hidden');
+                    document.getElementById('admin-empty-state').classList.remove('hidden');
+                    document.getElementById('admin-empty-state').innerHTML = `<p class="text-red-500 font-bold mt-4">Error loading data. ${error.message}</p>`;
+                });
+
+            } catch (error) {
+                console.error("Init fetch error:", error);
+            }
+        };
+
+        window.deleteAppointment = async function(docId, isLocal) {
+            if(confirm("আপনি কি এই রিকোয়েস্টটি মুছে ফেলতে চান?")) {
+                try {
+                    if(isLocal) {
+                        // Delete from local storage
+                        let localAppointments = JSON.parse(localStorage.getItem('pratisruti_appointments') || '[]');
+                        localAppointments = localAppointments.filter(app => app.id !== docId);
+                        localStorage.setItem('pratisruti_appointments', JSON.stringify(localAppointments));
+                        window.loadAppointments(); // Refresh table
+                    } else if(db) {
+                        // Delete from Firebase
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'appointments', docId);
+                        await deleteDoc(docRef);
+                    }
+                } catch (error) {
+                    console.error("Error deleting:", error);
+                    alert("ডিলিট করতে সমস্যা হয়েছে!");
+                }
+            }
+        };
+        
+        // Auth Init logic to prevent errors
+        async function initAuth() {
+            if(auth) {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token).catch(e => console.log(e));
+                } else {
+                    await signInAnonymously(auth).catch(e => console.log(e));
+                }
+            }
+        }
+        initAuth();
+
+    </script>
+
+    <!-- JavaScript Script (UI Logic) -->
+    <script>
+        function showPage(pageId) {
+            // Stop listening to DB if navigating away from admin
+            if(pageId !== 'admin-panel' && window.unsubscribeAppointments) {
+                window.unsubscribeAppointments();
+                window.unsubscribeAppointments = null;
+            }
+
+            // Hide all sections
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.remove('active-section');
+            });
+            
+            // Remove active class from nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(pageId).classList.add('active-section');
+            
+            // Highlight nav button if exists
+            const navBtn = document.getElementById('btn-' + pageId);
+            if(navBtn) navBtn.classList.add('active');
+
+            // Close mobile menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+
+            // Scroll to top smoothly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Set Home as default active button on load
+        document.addEventListener("DOMContentLoaded", () => {
+             document.getElementById('btn-home').classList.add('active');
+        });
+
+        // Appointment Modal Functions
+        window.openAppointmentModal = function() {
+            const modal = document.getElementById('appointment-modal');
+            const content = document.getElementById('appointment-modal-content');
+            
+            // Close mobile menu if open before showing modal
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Small delay for CSS transitions to work
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+        }
+
+        window.closeAppointmentModal = function() {
+            const modal = document.getElementById('appointment-modal');
+            const content = document.getElementById('appointment-modal-content');
+            
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300); // Matches the CSS transition duration
+        }
+    </script>
+</body>
+</html>
